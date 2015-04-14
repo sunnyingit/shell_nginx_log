@@ -56,7 +56,6 @@ class Sitemap
     {
         $filePath = APP_PATH . $this->config[$this->method];
 
-        $tplPath = APP_PATH . 'view/' .  $this->method . '.xml';
         $handle = fopen($filePath, 'r');  
         if ($handle) {  
             while(! feof($handle)) {  
