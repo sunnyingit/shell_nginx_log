@@ -27,10 +27,6 @@ class Sitemap
 
     protected function __construct()
     {
-        if (! defined('DS')) {
-            define('DS', DIRECTORY_SEPARATOR);
-        }
-
         $this->method = trim($_SERVER['REQUEST_URI'], '/');
 
         if (! in_array($this->method, array('r', 'm'))) {
