@@ -45,11 +45,6 @@ class Sitemap
 
     public function run()
     {
-        $this->getSeed();
-    }
-
-    private function getSeed() 
-    {
         $filePath = APP_PATH . $this->config[$this->method];
 
         $handle = fopen($filePath, 'r');  
