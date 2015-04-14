@@ -7,20 +7,22 @@ class Sitemap
 
     // 日志文件
     protected $config = array(
-        'r' => 'seed/r.txt',
-        'm' => 'seed/m.txt'
+        'r' => 'shell/r.access.log',
+        'm' => 'shell/m.access.log'
     );
 
     // xml配置
     protected $xmlConfig = array(
-        'lastmod' => '',
-        'changefreq' => 'weekly',
-        'priority' => '0.8'
+        'lastmod'    => '',
+        'changefreq' => 'daily',
+        'priority'   => '0.8'
     );
 
-    const HOST = "http://m.ele.me/place/";
+    protected $hostConfig = array(
+        'r' => "http://m.ele.me/",
+        'm' => "http://m.ele.me/place/"
+    );
 
-    // 请求的方法
     protected $method = '';
 
     protected function __construct()
@@ -59,17 +61,29 @@ class Sitemap
         if ($handle) {  
             while(! feof($handle)) {  
                 $buffer = trim(fgets($handle));
-                $data[] = $buffer;  
+                // 去重处理
+                $data[md5($buffer)] = $buffer;  
             }  
         }
 
         $items = array_chunk($data, 50000); 
 
+        $sitemapIndex = count($items);
+
+        $string = '';
+        for ($i = 0; $i < $sitemapIndex; $i++) {
+            $string .= "Sitemap: http://m.ele.me/sitemap" . $i . ".xml" . "\r\n";
+        }
+
+        file_put_contents('data/' . $this->method . '/roots.txt', $string);
+
         foreach ($items as $key => $item) {
             $xml = $this->buildXml($item);
 
-            file_put_contents('data/sitemap'. $key .'xml', $xml);
+            file_put_contents('data/'. $this->method . '/sitemap'. $key .'.xml', $xml);
         }
+
+        echo "DONE";
 
         fclose($handle); 
     }
@@ -78,16 +92,18 @@ class Sitemap
     private function buildXml($data)
     {
         $string = <<<XML
-<?xml version='1.0'?> 
+<?xml version='1.0' encoding='utf-8'?> 
 <urlset>
 </urlset>
 XML;
         $xml = simplexml_load_string($string);
+
+        $host = $this->hostConfig[$this->method];
          
         foreach ($data as $val) {
             $item = $xml->addChild('url');
 
-            $item->addChild('loc', self::HOST . $val);
+            $item->addChild('loc',  $host . $val);
 
             foreach ($this->xmlConfig as $field => $value) {
 
@@ -97,15 +113,5 @@ XML;
         }
 
         return $xml->asXML();
-    }
-
-    public function genaratexml()
-    {
-
-    }
-
-    public function genamrateSitemapIndex()
-    {
-
     }
 }
